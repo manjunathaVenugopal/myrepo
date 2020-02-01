@@ -1,1 +1,1 @@
-/usr/bin/python copyTools.py
+/usr/bin/python myScripts/copyTools.py
