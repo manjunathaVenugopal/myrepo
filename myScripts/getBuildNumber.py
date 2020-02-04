@@ -33,7 +33,7 @@ def main():
 
     if version:
         if 'major' == sys.argv[1].lower():
-            buildNo = int(float(version)) + 1
+            buildNo = float(int(float(version)) + 1)
             print(str(buildNo))
         if 'minor' == sys.argv[1].lower():
             buildNo = float(version) + 0.1
