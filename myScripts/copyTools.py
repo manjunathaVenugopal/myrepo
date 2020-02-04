@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 
 output = os.system('cp -r /root/hptools/oosha/ \./')
@@ -12,3 +14,5 @@ if os.path.isdir(directory):
     print("Copied HPOO succesfully to the current directory")
 else:
     print("Failed to copy")
+    sys.exit(2)
+ 
