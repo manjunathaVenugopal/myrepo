@@ -3,20 +3,32 @@
 import sys
 import os
 import json
+import re
 
 sys.path.append(os.getcwd())
 import operations
 
 def usage():
-    if len(sys.argv) == 3:
-        main(sys.argv[1],sys.argv[2])
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
     else:
         print("Please run the script with an argument")
-        print("./uploadFile.py 'contentPackJar' 'buildNumber'")
+        print("./uploadFile.py 'buildNumber'")
         sys.exit(1)
 
-def main(arg,buildNo):
+def main(buildNo):
 
+    #find the latest jar file
+
+    dirList = os.listdir(os.getcwd())
+    pattern = ".*" + str(buildNo) + ".*"
+    for eachlist in dirList:
+        if re.findall(pattern,str(eachlist)):
+            arg = eachlist
+
+    if not(arg):
+        print("failed the get latest jar")
+        sys.exit(1)
     # variable declaration
     flag = 0
     shortNameCp = arg.split(".jar")[0]
