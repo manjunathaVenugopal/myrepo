@@ -1,4 +1,4 @@
-#!/usr/bin/env python -u
+#!/usr/bin/env python
 
 import requests
 import urllib3
@@ -8,6 +8,8 @@ import time
 
 sys.path.append(os.getcwd())
 import operations
+import functools
+print = functools.partial(print, flush=True)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #to Ignore SSL certificate
 
