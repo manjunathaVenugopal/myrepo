@@ -1,0 +1,110 @@
+pipeline {
+	agent {
+	    label 'LinuxSlave'
+	}
+	stages {
+		stage("Git-Checkout") {
+			steps {
+			    git 'https://github.com/manjunathaVenugopal/myrepo.git'
+				echo "Git CheckOut completed succesfully"
+				
+			}
+		}
+		stage("ChangeToExecutable") {
+			steps {
+				sh 'chmod +x myScripts/*'
+			}
+		}
+		
+		stage("Parallel-Test") {
+			parallel { 
+				stage("get the BuildNumber") {
+					steps {
+						script {
+						 buildNo = sh(script: './myScripts/getBuildNumber.py "${BuildVersion}"',returnStdout: true).trim()
+						}
+						echo "BuildNo: ${buildNo}"
+					}
+				}
+				
+				
+				stage("CopyTools") {
+					steps {
+						sh './myScripts/copyTools.py'
+					}
+				}
+			}
+		}
+		stage("BuildCP") {
+			steps {
+				sh "./oosha/oosha.sh createCP --projectFolder 'myJenkinTest' --destinationFolder './' --version '${buildNo}'"
+				echo "Building the jar file succesfully"
+			}
+		}
+		
+		stage("DeployCP") {
+			steps {
+				sh "./myScripts/uploadFile.py ${buildNo}"
+				echo "Deployed the jar file succesfully"
+			}
+		}
+		
+				
+		stage("UnitTest-Parallel") {
+			parallel { 
+				stage("Unit_test1") {
+					steps {
+						sh "./myScripts/restAPI.py ${FlowUUID} ${FlowExecName}"
+						echo "Unit Test1 succesfull"
+					}
+				}
+				stage("Unit_test2") {
+					steps {
+						sh "./myScripts/restAPI.py ${FlowUUID} ${FlowExecName}"
+						echo "Unit Test2 succesfull"
+					}
+				}
+			}
+		
+		}
+	}
+	post {
+		always {
+			echo "This will always run"
+		}
+		success {
+		    	emailext (
+                    subject: "Job completed",
+                    body: """BuildNo: ${buildNo} jarFile : myJenkinTest-cp-${buildNo}.jar""",
+                    to: "manjunathv643@gmail.com",
+                    )
+			echo "This will run only if successful"
+		}
+		failure {
+			echo "This will run only if failed"
+				emailext (
+                    subject: "Job Failed",
+                    body: """BuildNo: ${buildNo} jarFile : myJenkinTest-cp-${buildNo}.jar""",
+                    to: "manjunathv643@gmail.com",
+                    )
+		}
+		unstable {
+			echo "This will run only if run was marked as unstable"
+				emailext (
+                    subject: "Job Unstable",
+                    body: """BuildNo: ${buildNo} jarFile : myJenkinTest-cp-${buildNo}.jar""",
+                    to: "manjunathv643@gmail.com",
+                    )
+		}
+		changed {
+			echo "This will run only if the state of the pipeline is changed "
+			echo "For Example: if the pipeline was previsouly failed and now successful"
+			emailext (
+                    subject: "Job Success",
+                    body: """BuildNo: ${buildNo} jarFile : myJenkinTest-cp-${buildNo}.jar""",
+                    to: "manjunathv643@gmail.com",
+                    )
+		}
+	}
+		
+}
