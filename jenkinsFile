@@ -67,6 +67,13 @@ pipeline {
 			}
 		
 		}
+	
+		stage("Upload Build to Nexus Repo") {
+			steps {
+				sh label: '', script: 'curl -v -u admin:admin123 --upload-file /root/jenkinsslave/workspace/HPOO_Pipeline/myJenkinTest-cp-${buildNo}.jar http://130.175.106.163:8081/repository/HPOO/Demo/'
+				echo "Uploaded the jar file succesfully to Nexus Repo"
+			}
+		}
 	}
 	post {
 		always {
